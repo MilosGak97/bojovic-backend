@@ -1,15 +1,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { BrokerCompanyRepository } from './repositories/broker-company.repository';
 import { BrokerTrustProfileRepository } from './repositories/broker-trust-profile.repository';
 import { CreateBrokerCompanyDto } from './dto/create-broker-company.dto';
+import { CreateBrokerContactDto } from './dto/create-broker-contact.dto';
 import { UpdateBrokerCompanyDto } from './dto/update-broker-company.dto';
 import { BrokerCompany } from './entities/broker-company.entity';
+import { BrokerContact } from './entities/broker-contact.entity';
 
 @Injectable()
 export class BrokerService {
   constructor(
     private readonly companyRepo: BrokerCompanyRepository,
     private readonly trustRepo: BrokerTrustProfileRepository,
+    @InjectRepository(BrokerContact)
+    private readonly contactRepo: Repository<BrokerContact>,
   ) {}
 
   async create(dto: CreateBrokerCompanyDto): Promise<BrokerCompany> {
@@ -46,5 +52,27 @@ export class BrokerService {
 
   async search(query: string): Promise<BrokerCompany[]> {
     return this.companyRepo.searchByName(query);
+  }
+
+  async findContacts(companyId: string): Promise<BrokerContact[]> {
+    await this.findOne(companyId);
+    return this.contactRepo.find({
+      where: { companyId },
+      order: { isPrimary: 'DESC', lastName: 'ASC', firstName: 'ASC' },
+    });
+  }
+
+  async createContact(dto: CreateBrokerContactDto): Promise<BrokerContact> {
+    await this.findOne(dto.companyId);
+    const contact = this.contactRepo.create({
+      ...dto,
+      firstName: dto.firstName.trim(),
+      lastName: dto.lastName.trim(),
+      email: dto.email?.trim() ?? null,
+      phone: dto.phone?.trim() ?? null,
+      mobile: dto.mobile?.trim() ?? null,
+      notes: dto.notes?.trim() ?? null,
+    });
+    return this.contactRepo.save(contact);
   }
 }

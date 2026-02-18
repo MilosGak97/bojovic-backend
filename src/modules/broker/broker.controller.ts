@@ -18,8 +18,10 @@ import {
 } from '@nestjs/swagger';
 import { BrokerService } from './broker.service';
 import { CreateBrokerCompanyDto } from './dto/create-broker-company.dto';
+import { CreateBrokerContactDto } from './dto/create-broker-contact.dto';
 import { UpdateBrokerCompanyDto } from './dto/update-broker-company.dto';
 import { BrokerCompany } from './entities/broker-company.entity';
+import { BrokerContact } from './entities/broker-contact.entity';
 
 @ApiTags('Brokers')
 @Controller('brokers')
@@ -71,6 +73,51 @@ export class BrokerController {
   findAll(@Query('search') search?: string) {
     if (search) return this.brokerService.search(search);
     return this.brokerService.findAll();
+  }
+
+  @Get('contacts/company/:companyId')
+  @ApiOperation({
+    summary: 'List contacts for a broker company',
+    description:
+      'Returns all broker contacts linked to the provided broker company UUID.',
+  })
+  @ApiParam({
+    name: 'companyId',
+    description: 'UUID v4 of the broker company whose contacts should be returned.',
+    example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    format: 'uuid',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of contacts for the selected broker company.',
+    type: [BrokerContact],
+  })
+  findContacts(@Param('companyId', ParseUUIDPipe) companyId: string) {
+    return this.brokerService.findContacts(companyId);
+  }
+
+  @Post('contacts')
+  @ApiOperation({
+    summary: 'Create a broker contact',
+    description:
+      'Creates a new contact and links it to the broker company provided as companyId in the request body.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Broker contact successfully created.',
+    type: BrokerContact,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation failed — one or more request body fields are invalid or missing.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found — no broker company exists with the provided companyId.',
+  })
+  createContact(@Body() dto: CreateBrokerContactDto) {
+    return this.brokerService.createContact(dto);
   }
 
   @Get(':id')

@@ -1,4 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { LoadRepository } from './repositories/load.repository';
 import { CreateLoadDto } from './dto/create-load.dto';
 import { UpdateLoadDto } from './dto/update-load.dto';
@@ -7,14 +9,63 @@ import { LoadFreightDetails } from './entities/load-freight-details.entity';
 import { LoadPallet } from './entities/load-pallet.entity';
 import { LoadStop } from './entities/load-stop.entity';
 import { LoadStatus } from '../../common/enums';
+import { BrokerContact } from '../broker/entities/broker-contact.entity';
+import { Van } from '../van/entities/van.entity';
 
 @Injectable()
 export class LoadService {
-  constructor(private readonly loadRepo: LoadRepository) {}
+  constructor(
+    private readonly loadRepo: LoadRepository,
+    @InjectRepository(BrokerContact)
+    private readonly brokerContactRepo: Repository<BrokerContact>,
+    @InjectRepository(Van)
+    private readonly vanRepo: Repository<Van>,
+  ) {}
+
+  private async resolveBrokerContactLink(input: {
+    brokerId?: string;
+    brokerContactId?: string;
+  }): Promise<{ brokerId?: string; brokerContactId?: string }> {
+    if (!input.brokerContactId) return {};
+
+    const brokerContact = await this.brokerContactRepo.findOne({
+      where: { id: input.brokerContactId },
+    });
+    if (!brokerContact) {
+      throw new BadRequestException(`Broker contact ${input.brokerContactId} not found.`);
+    }
+
+    if (input.brokerId && brokerContact.companyId !== input.brokerId) {
+      throw new BadRequestException(
+        'Selected broker contact does not belong to the selected broker company.',
+      );
+    }
+
+    return {
+      brokerContactId: brokerContact.id,
+      brokerId: input.brokerId ?? brokerContact.companyId,
+    };
+  }
+
+  private async validatePlannerVan(plannerVanId?: string): Promise<void> {
+    if (!plannerVanId) return;
+    const plannerVan = await this.vanRepo.findOne({ where: { id: plannerVanId } });
+    if (!plannerVan) {
+      throw new BadRequestException(`Van ${plannerVanId} not found.`);
+    }
+  }
 
   async create(dto: CreateLoadDto): Promise<Load> {
+    await this.validatePlannerVan(dto.plannerVanId);
+
+    const brokerLink = await this.resolveBrokerContactLink({
+      brokerId: dto.brokerId,
+      brokerContactId: dto.brokerContactId,
+    });
+
     const load = this.loadRepo.create({
       ...dto,
+      ...brokerLink,
       freightDetails: dto.freightDetails ? dto.freightDetails : undefined,
       pallets: dto.pallets ? dto.pallets : undefined,
       stops: dto.stops ? dto.stops : undefined,
@@ -42,8 +93,26 @@ export class LoadService {
   async update(id: string, dto: UpdateLoadDto): Promise<Load> {
     const existing = await this.findOne(id);
     const { freightDetails, pallets, stops, ...scalarUpdates } = dto;
+    await this.validatePlannerVan(scalarUpdates.plannerVanId);
+    const brokerLink = await this.resolveBrokerContactLink({
+      brokerId: scalarUpdates.brokerId,
+      brokerContactId: scalarUpdates.brokerContactId,
+    });
 
-    Object.assign(existing, scalarUpdates);
+    Object.assign(existing, scalarUpdates, brokerLink);
+
+    if (
+      scalarUpdates.brokerId &&
+      scalarUpdates.brokerContactId === undefined &&
+      existing.brokerContactId
+    ) {
+      const existingContact = await this.brokerContactRepo.findOne({
+        where: { id: existing.brokerContactId },
+      });
+      if (!existingContact || existingContact.companyId !== scalarUpdates.brokerId) {
+        existing.brokerContactId = null;
+      }
+    }
 
     if (freightDetails !== undefined) {
       existing.freightDetails = this.loadRepo.manager.create(LoadFreightDetails, {

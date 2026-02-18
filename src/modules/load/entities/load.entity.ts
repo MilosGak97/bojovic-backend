@@ -10,17 +10,21 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { BrokerCompany } from '../../broker/entities/broker-company.entity';
+import { BrokerContact } from '../../broker/entities/broker-contact.entity';
 import { LoadStop } from './load-stop.entity';
 import { LoadFreightDetails } from './load-freight-details.entity';
 import { LoadPallet } from './load-pallet.entity';
 import { PaymentRecord } from '../../payment/entities/payment-record.entity';
 import { Document } from '../../document/entities/document.entity';
+import { Van } from '../../van/entities/van.entity';
 import { LoadStatus, Currency, LoadBoardSource } from '../../../common/enums';
 
 @Entity('loads')
 @Index('IDX_load_reference', ['referenceNumber'], { unique: true })
 @Index('IDX_load_status', ['status'])
 @Index('IDX_load_broker', ['brokerId'])
+@Index('IDX_load_broker_contact', ['brokerContactId'])
+@Index('IDX_load_planner_van', ['plannerVanId'])
 @Index('IDX_load_pickup_date', ['pickupDateFrom'])
 @Index('IDX_load_delivery_date', ['deliveryDateFrom'])
 @Index('IDX_load_created', ['createdAt'])
@@ -33,6 +37,16 @@ export class Load extends BaseEntity {
   })
   @Column({ name: 'reference_number', length: 50 })
   referenceNumber: string;
+
+  @ApiPropertyOptional({
+    description: 'Optional freight number from Trans.eu for external cross-reference',
+    example: 'TE-PL-2026-004512',
+    maxLength: 100,
+    nullable: true,
+    type: String,
+  })
+  @Column({ name: 'trans_eu_freight_number', type: 'varchar', length: 100, nullable: true })
+  transEuFreightNumber: string | null;
 
   @ApiProperty({
     description: 'Current workflow status of the load',
@@ -358,10 +372,38 @@ export class Load extends BaseEntity {
   @Column({ name: 'broker_id', type: 'uuid', nullable: true })
   brokerId: string | null;
 
+  @ApiPropertyOptional({
+    description: 'UUID of the broker contact person assigned to this load',
+    example: 'b3c5f3ce-cf59-49bc-9cc0-66f929f3e7f8',
+    format: 'uuid',
+    nullable: true,
+    type: String,
+  })
+  @Column({ name: 'broker_contact_id', type: 'uuid', nullable: true })
+  brokerContactId: string | null;
+
+  @ApiPropertyOptional({
+    description: 'UUID of the van this load is assigned to in load planner',
+    example: '2df1ba90-8458-4fd4-8a57-cf965b5cdb8c',
+    format: 'uuid',
+    nullable: true,
+    type: String,
+  })
+  @Column({ name: 'planner_van_id', type: 'uuid', nullable: true })
+  plannerVanId: string | null;
+
   // ─── Relations ──────────────────────────────────────
   @ManyToOne(() => BrokerCompany, (broker) => broker.loads, { nullable: true })
   @JoinColumn({ name: 'broker_id' })
   broker: BrokerCompany | null;
+
+  @ManyToOne(() => BrokerContact, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'broker_contact_id' })
+  brokerContact: BrokerContact | null;
+
+  @ManyToOne(() => Van, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'planner_van_id' })
+  plannerVan: Van | null;
 
   @OneToMany(() => LoadStop, (stop) => stop.load, { cascade: true, orphanedRowAction: 'delete' })
   stops: LoadStop[];

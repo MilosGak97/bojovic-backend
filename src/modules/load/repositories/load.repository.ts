@@ -12,7 +12,7 @@ export class LoadRepository extends Repository<Load> {
   async findWithRelations(id: string): Promise<Load | null> {
     return this.findOne({
       where: { id },
-      relations: ['broker', 'stops', 'freightDetails', 'pallets'],
+      relations: ['broker', 'brokerContact', 'plannerVan', 'stops', 'freightDetails', 'pallets'],
     });
   }
 
@@ -25,6 +25,8 @@ export class LoadRepository extends Repository<Load> {
     const qb = this.createQueryBuilder('load')
       .distinct(true)
       .leftJoinAndSelect('load.broker', 'broker')
+      .leftJoinAndSelect('load.brokerContact', 'brokerContact')
+      .leftJoinAndSelect('load.plannerVan', 'plannerVan')
       .leftJoinAndSelect('load.freightDetails', 'freight')
       .leftJoinAndSelect('load.stops', 'stops')
       .leftJoinAndSelect('load.pallets', 'pallets')
@@ -51,7 +53,7 @@ export class LoadRepository extends Repository<Load> {
   async findByReferenceNumber(ref: string): Promise<Load | null> {
     return this.findOne({
       where: { referenceNumber: ref },
-      relations: ['broker', 'freightDetails'],
+      relations: ['broker', 'brokerContact', 'plannerVan', 'freightDetails'],
     });
   }
 }

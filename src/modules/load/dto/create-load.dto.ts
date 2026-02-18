@@ -333,6 +333,17 @@ export class CreateLoadDto {
   referenceNumber: string;
 
   @ApiPropertyOptional({
+    description: 'Optional freight number from Trans.eu for external cross-reference',
+    example: 'TE-PL-2026-004512',
+    maxLength: 100,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  transEuFreightNumber?: string;
+
+  @ApiPropertyOptional({
     description: 'Initial workflow status of the load (defaults to DRAFT if omitted)',
     example: LoadStatus.PUBLISHED,
     enum: LoadStatus,
@@ -617,6 +628,26 @@ export class CreateLoadDto {
   @IsOptional()
   @IsUUID()
   brokerId?: string;
+
+  @ApiPropertyOptional({
+    description: 'UUID of the broker contact person assigned to this load',
+    example: 'b3c5f3ce-cf59-49bc-9cc0-66f929f3e7f8',
+    format: 'uuid',
+    type: String,
+  })
+  @IsOptional()
+  @IsUUID()
+  brokerContactId?: string;
+
+  @ApiPropertyOptional({
+    description: 'UUID of the van this load should be assigned to in load planner',
+    example: '2df1ba90-8458-4fd4-8a57-cf965b5cdb8c',
+    format: 'uuid',
+    type: String,
+  })
+  @IsOptional()
+  @IsUUID()
+  plannerVanId?: string;
 
   @ApiPropertyOptional({
     description: 'Free-text internal notes or special instructions for this load',
