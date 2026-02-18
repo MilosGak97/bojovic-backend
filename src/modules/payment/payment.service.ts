@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PaymentRecordRepository } from './repositories/payment-record.repository';
 import { CreatePaymentRecordDto } from './dto/create-payment-record.dto';
 import { UpdatePaymentRecordDto } from './dto/update-payment-record.dto';
+import { BrokerPaymentStatsDto } from './dto/broker-payment-stats.dto';
 import { PaymentRecord } from './entities/payment-record.entity';
 import { PaymentStatus } from '../../common/enums';
 
@@ -50,7 +51,7 @@ export class PaymentService {
     return this.findOne(id);
   }
 
-  async getBrokerStats(brokerId: string) {
+  async getBrokerStats(brokerId: string): Promise<BrokerPaymentStatsDto> {
     return this.paymentRepo.getBrokerPaymentStats(brokerId);
   }
 }

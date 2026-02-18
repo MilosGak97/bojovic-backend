@@ -56,6 +56,7 @@ export const getDatabaseConfig = (
     ssl: useSsl ? { rejectUnauthorized: false } : false,
     autoLoadEntities: true,
     synchronize: nodeEnv === 'development',
+    migrationsRun: nodeEnv === 'production',
     logging: nodeEnv === 'development',
     migrations: ['dist/migrations/*.js'],
     migrationsTableName: 'typeorm_migrations',

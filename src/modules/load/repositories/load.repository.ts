@@ -23,9 +23,14 @@ export class LoadRepository extends Repository<Load> {
     offset?: number;
   }): Promise<[Load[], number]> {
     const qb = this.createQueryBuilder('load')
+      .distinct(true)
       .leftJoinAndSelect('load.broker', 'broker')
       .leftJoinAndSelect('load.freightDetails', 'freight')
-      .orderBy('load.createdAt', 'DESC');
+      .leftJoinAndSelect('load.stops', 'stops')
+      .leftJoinAndSelect('load.pallets', 'pallets')
+      .orderBy('load.createdAt', 'DESC')
+      .addOrderBy('stops.orderIndex', 'ASC')
+      .addOrderBy('pallets.orderIndex', 'ASC');
 
     if (options?.status) {
       qb.andWhere('load.status = :status', { status: options.status });

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { PaymentRecord } from '../entities/payment-record.entity';
 import { PaymentStatus } from '../../../common/enums';
+import { BrokerPaymentStatsDto } from '../dto/broker-payment-stats.dto';
 
 @Injectable()
 export class PaymentRecordRepository extends Repository<PaymentRecord> {
@@ -35,13 +36,7 @@ export class PaymentRecordRepository extends Repository<PaymentRecord> {
       .getMany();
   }
 
-  async getBrokerPaymentStats(brokerId: string): Promise<{
-    totalLoads: number;
-    onTimeCount: number;
-    delayedCount: number;
-    issuesCount: number;
-    averagePaymentDays: number | null;
-  }> {
+  async getBrokerPaymentStats(brokerId: string): Promise<BrokerPaymentStatsDto> {
     const result = await this.createQueryBuilder('p')
       .select('COUNT(*)', 'totalLoads')
       .addSelect(
