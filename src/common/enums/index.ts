@@ -333,3 +333,47 @@ export enum DispatchStatus {
   /** Dispatch was cancelled before or during execution. */
   CANCELED = 'CANCELED',
 }
+
+// ─── Finance ───────────────────────────────────────────
+
+/**
+ * High-level accounting category for an expense record.
+ *
+ * @example 'FUEL'
+ */
+export enum ExpenseCategory {
+  FUEL = 'FUEL',
+  TOLL = 'TOLL',
+  MAINTENANCE = 'MAINTENANCE',
+  REPAIR = 'REPAIR',
+  PARKING = 'PARKING',
+  INSURANCE = 'INSURANCE',
+  LEASING = 'LEASING',
+  PERMITS = 'PERMITS',
+  OFFICE = 'OFFICE',
+  SOFTWARE = 'SOFTWARE',
+  SALARY = 'SALARY',
+  PER_DIEM = 'PER_DIEM',
+  OTHER = 'OTHER',
+}
+
+/**
+ * Distinguishes fixed overhead from variable and trip-linked expenses.
+ *
+ * @example 'VARIABLE'
+ */
+export enum ExpenseType {
+  FIXED = 'FIXED',
+  VARIABLE = 'VARIABLE',
+  TRIP_LINKED = 'TRIP_LINKED',
+}
+
+/**
+ * Payroll settlement state for a driver's monthly pay record.
+ *
+ * @example 'PENDING'
+ */
+export enum DriverPayStatus {
+  PENDING = 'PENDING',
+  PAID = 'PAID',
+}

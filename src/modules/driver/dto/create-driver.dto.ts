@@ -3,13 +3,14 @@ import {
   IsOptional,
   IsEmail,
   IsEnum,
+  IsNumber,
   IsBoolean,
   IsDateString,
   IsArray,
   MaxLength,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { DriverStatus } from '../../../common/enums';
+import { DriverStatus, Currency } from '../../../common/enums';
 
 export class CreateDriverDto {
   @ApiProperty({
@@ -141,6 +142,25 @@ export class CreateDriverDto {
   @IsOptional()
   @IsDateString()
   hiredAt?: string;
+
+  @ApiPropertyOptional({
+    description: 'Fixed monthly salary amount for this driver',
+    example: 2400.00,
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber()
+  monthlySalary?: number;
+
+  @ApiPropertyOptional({
+    description: 'Currency in which the fixed monthly salary is defined',
+    example: Currency.EUR,
+    enum: Currency,
+    enumName: 'Currency',
+  })
+  @IsOptional()
+  @IsEnum(Currency)
+  salaryCurrency?: Currency;
 
   @ApiPropertyOptional({
     description: 'Free-text notes or remarks about the driver (e.g. restrictions, preferences)',

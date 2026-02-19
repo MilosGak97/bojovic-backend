@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { DispatchAssignment } from '../../dispatch/entities/dispatch-assignment.entity';
 import { Document } from '../../document/entities/document.entity';
-import { DriverStatus } from '../../../common/enums';
+import { DriverStatus, Currency } from '../../../common/enums';
 
 @Entity('drivers')
 @Index('IDX_driver_status', ['status'])
@@ -135,6 +135,31 @@ export class Driver extends BaseEntity {
   })
   @Column({ name: 'hired_at', type: 'date', nullable: true })
   hiredAt: Date | null;
+
+  @ApiPropertyOptional({
+    description: 'Fixed monthly salary amount for this driver',
+    example: 2400.00,
+    nullable: true,
+    type: Number,
+  })
+  @Column({ name: 'monthly_salary', type: 'decimal', precision: 10, scale: 2, nullable: true })
+  monthlySalary: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Currency in which the fixed monthly salary is defined',
+    example: Currency.EUR,
+    enum: Currency,
+    enumName: 'Currency',
+    nullable: true,
+  })
+  @Column({
+    name: 'salary_currency',
+    type: 'enum',
+    enum: Currency,
+    enumName: 'driver_salary_currency_enum',
+    nullable: true,
+  })
+  salaryCurrency: Currency | null;
 
   @ApiPropertyOptional({
     description: 'Free-text notes or remarks about the driver (e.g. restrictions, preferences)',

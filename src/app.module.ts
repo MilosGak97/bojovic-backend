@@ -14,6 +14,7 @@ import { DriverModule } from './modules/driver/driver.module';
 import { DispatchModule } from './modules/dispatch/dispatch.module';
 import { DocumentModule } from './modules/document/document.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { FinanceModule } from './modules/finance/finance.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PaymentModule } from './modules/payment/payment.module';
     DispatchModule,
     DocumentModule,
     PaymentModule,
+    FinanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

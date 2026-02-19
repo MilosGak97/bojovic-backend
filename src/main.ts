@@ -43,6 +43,7 @@ async function bootstrap() {
     .addTag('Dispatch', 'Van + driver + route assignment management')
     .addTag('Documents', 'Document management for loads, brokers, drivers, and vans')
     .addTag('Payments', 'Payment tracking, invoicing, and broker payment statistics')
+    .addTag('Finance', 'Expenses, payroll records, and profitability reporting')
     .addTag('System', 'Service-level health/info endpoints')
     .build();
 

@@ -7,7 +7,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { VanStatus, VanType } from '../../../common/enums';
+import { VanStatus, VanType, Currency } from '../../../common/enums';
 
 export class CreateVanDto {
   @ApiProperty({
@@ -184,6 +184,34 @@ export class CreateVanDto {
   @IsOptional()
   @IsDateString()
   technicalInspectionUntil?: string;
+
+  @ApiPropertyOptional({
+    description: 'Fixed monthly leasing cost for this vehicle',
+    example: 980.00,
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber()
+  monthlyLeasingCost?: number;
+
+  @ApiPropertyOptional({
+    description: 'Fixed monthly insurance cost for this vehicle',
+    example: 240.00,
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber()
+  monthlyInsuranceCost?: number;
+
+  @ApiPropertyOptional({
+    description: 'Currency used for fixed monthly cost fields',
+    example: Currency.EUR,
+    enum: Currency,
+    enumName: 'Currency',
+  })
+  @IsOptional()
+  @IsEnum(Currency)
+  costCurrency?: Currency;
 
   @ApiPropertyOptional({
     description: 'Free-text notes or remarks about the van (e.g. known issues, special equipment)',

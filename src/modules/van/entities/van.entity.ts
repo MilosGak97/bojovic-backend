@@ -4,7 +4,7 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 import { DispatchAssignment } from '../../dispatch/entities/dispatch-assignment.entity';
 import { RoutePlan } from '../../route/entities/route-plan.entity';
 import { Document } from '../../document/entities/document.entity';
-import { VanStatus, VanType } from '../../../common/enums';
+import { VanStatus, VanType, Currency } from '../../../common/enums';
 
 @Entity('vans')
 @Index('IDX_van_license', ['licensePlate'], { unique: true })
@@ -188,6 +188,40 @@ export class Van extends BaseEntity {
   })
   @Column({ name: 'technical_inspection_until', type: 'date', nullable: true })
   technicalInspectionUntil: Date | null;
+
+  @ApiPropertyOptional({
+    description: 'Fixed monthly leasing cost for this vehicle',
+    example: 980.00,
+    nullable: true,
+    type: Number,
+  })
+  @Column({ name: 'monthly_leasing_cost', type: 'decimal', precision: 10, scale: 2, nullable: true })
+  monthlyLeasingCost: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Fixed monthly insurance cost for this vehicle',
+    example: 240.00,
+    nullable: true,
+    type: Number,
+  })
+  @Column({ name: 'monthly_insurance_cost', type: 'decimal', precision: 10, scale: 2, nullable: true })
+  monthlyInsuranceCost: number | null;
+
+  @ApiPropertyOptional({
+    description: 'Currency used for fixed monthly cost fields',
+    example: Currency.EUR,
+    enum: Currency,
+    enumName: 'Currency',
+    nullable: true,
+  })
+  @Column({
+    name: 'cost_currency',
+    type: 'enum',
+    enum: Currency,
+    enumName: 'van_cost_currency_enum',
+    nullable: true,
+  })
+  costCurrency: Currency | null;
 
   @ApiPropertyOptional({
     description: 'Free-text notes or remarks about the van (e.g. known issues, special equipment)',
