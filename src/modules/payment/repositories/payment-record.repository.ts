@@ -10,6 +10,13 @@ export class PaymentRecordRepository extends Repository<PaymentRecord> {
     super(PaymentRecord, dataSource.createEntityManager());
   }
 
+  async findAllWithRelations(): Promise<PaymentRecord[]> {
+    return this.find({
+      relations: ['load', 'broker'],
+      order: { dueDate: 'ASC', createdAt: 'DESC' },
+    });
+  }
+
   async findByLoad(loadId: string): Promise<PaymentRecord[]> {
     return this.find({
       where: { loadId },

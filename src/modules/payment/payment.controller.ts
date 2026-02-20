@@ -151,8 +151,7 @@ export class PaymentController {
     summary: 'List payment records filtered by load or broker',
     description:
       'Returns all payment records associated with the specified load (loadId) ' +
-      'or broker (brokerId). Exactly one query parameter should be provided. ' +
-      'If neither is supplied the endpoint returns an empty array.',
+      'or broker (brokerId). If no filter is supplied, returns all payment records.',
   })
   @ApiQuery({
     name: 'loadId',
@@ -181,7 +180,7 @@ export class PaymentController {
   ) {
     if (loadId) return this.paymentService.findByLoad(loadId);
     if (brokerId) return this.paymentService.findByBroker(brokerId);
-    return [];
+    return this.paymentService.findAll();
   }
 
   // ─── Update — full replacement ───────────────────────────────────────────────

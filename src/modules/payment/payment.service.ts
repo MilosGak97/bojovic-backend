@@ -10,6 +10,10 @@ import { PaymentStatus } from '../../common/enums';
 export class PaymentService {
   constructor(private readonly paymentRepo: PaymentRecordRepository) {}
 
+  async findAll(): Promise<PaymentRecord[]> {
+    return this.paymentRepo.findAllWithRelations();
+  }
+
   async create(dto: CreatePaymentRecordDto): Promise<PaymentRecord> {
     const record = this.paymentRepo.create(dto);
     return this.paymentRepo.save(record);
